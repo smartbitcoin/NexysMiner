@@ -1,3 +1,5 @@
+`include "utils.v"
+
 module ltcminer_icarus (osc_clk, RxD, TxD, led,  dip);
 
 	function integer clog2;		// Courtesy of razorfishsl, replaces $clog2()
@@ -45,20 +47,16 @@ module ltcminer_icarus (osc_clk, RxD, TxD, led,  dip);
 	parameter BAUD_RATE = 115_200;
 `endif
 
-// kramble - nonce distribution is crude using top 4 bits of nonce so max LOCAL_MINERS = 8
-// teknohog's was more sophisticated, but requires modification of hashcore.v
-
-// Miners on the same FPGA with this hub
-`ifdef LOCAL_MINERS
-	parameter LOCAL_MINERS = `LOCAL_MINERS;
-`else
-	parameter LOCAL_MINERS = 2;						// One to four cores (configures ADDRBITS automatically)
+`ifdef NEXYS4
+		parameter LOCAL_MINERS = 2;						// One to four cores (configures ADDRBITS automatically)
+`else 
+		parameter LOCAL_MINERS = 1;						// One to four cores (configures ADDRBITS automatically)
 `endif
 
-`ifdef ADDRBITS
-	parameter ADDRBITS = `ADDRBITS;					// Override for simulation or a quick ISE build (eg one 10 bit core)
-`else
+`ifdef NEXYS4
 	parameter ADDRBITS = 12 - clog2(LOCAL_MINERS);	// Automatically selects largest RAM that will fit LX150
+`else
+	parameter ADDRBITS = 11 - clog2(LOCAL_MINERS);	// Automatically selects largest RAM that will fit LX150
 `endif
 
 
